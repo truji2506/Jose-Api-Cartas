@@ -38,10 +38,52 @@ public class PokemonSprites
 }
 
 [System.Serializable]
-public class PokemonData
+public class PokemonTypeInfo
 {
     public string name;
+}
+
+[System.Serializable]
+public class PokemonTypeSlot
+{
+    public int slot;
+    public PokemonTypeInfo type;
+}
+
+[System.Serializable]
+public class PokemonStatInfo
+{
+    public string name;
+}
+
+[System.Serializable]
+public class PokemonStatSlot
+{
+    public int base_stat;
+    public PokemonStatInfo stat;
+}
+
+[System.Serializable]
+public class PokemonAbilityInfo
+{
+    public string name;
+}
+
+[System.Serializable]
+public class PokemonAbilitySlot
+{
+    public PokemonAbilityInfo ability;
+}
+
+[System.Serializable]
+public class PokemonData
+{
+    public int id;
+    public string name;
     public PokemonSprites sprites;
+    public PokemonTypeSlot[] types;
+    public PokemonStatSlot[] stats;
+    public PokemonAbilitySlot[] abilities;
 }
 
 #endregion
@@ -56,6 +98,8 @@ public class ApiClient : MonoBehaviour
     [Header("UI - Card")]
     [SerializeField] private Image cardImage;
     [SerializeField] private TMP_Text cardName;
+    [SerializeField] private TMP_Text cardTypeText;
+    [SerializeField] private TMP_Text cardStatsText;
 
     [Header("UI - Player")]
     [SerializeField] private TMP_Text userNameText;
@@ -105,7 +149,7 @@ public class ApiClient : MonoBehaviour
             ProjectInfo project = JsonUtility.FromJson<ProjectInfo>(req.downloadHandler.text);
 
             if (studentNameText != null)
-                studentNameText.text = project.studentName;
+                studentNameText.text = "Estudiante: " + project.studentName;
 
             Debug.Log($"Proyecto: {project.projectName}");
             Debug.Log($"Estudiante: {project.studentName}");
@@ -211,7 +255,34 @@ public class ApiClient : MonoBehaviour
             PokemonData pokemon = JsonUtility.FromJson<PokemonData>(req.downloadHandler.text);
 
             if (cardName != null)
-                cardName.text = pokemon.name;
+            {
+                string formattedName = string.IsNullOrEmpty(pokemon.name) 
+                    ? "" 
+                    : char.ToUpper(pokemon.name[0]) + pokemon.name.Substring(1);
+                cardName.text = formattedName;
+            }
+
+            // Mostrar Tipo y Habilidad
+            if (cardTypeText != null)
+            {
+                string typeStr = (pokemon.types != null && pokemon.types.Length > 0 && pokemon.types[0].type != null) 
+                    ? char.ToUpper(pokemon.types[0].type.name[0]) + pokemon.types[0].type.name.Substring(1) 
+                    : "Normal";
+                string abilityStr = (pokemon.abilities != null && pokemon.abilities.Length > 0 && pokemon.abilities[0].ability != null)
+                    ? char.ToUpper(pokemon.abilities[0].ability.name[0]) + pokemon.abilities[0].ability.name.Substring(1)
+                    : "Ninguna";
+                cardTypeText.text = $"Tipo: {typeStr}  |  Hab: {abilityStr}";
+            }
+
+            // Mostrar Estadisticas base (HP, ATK, DEF, SPD)
+            if (cardStatsText != null && pokemon.stats != null && pokemon.stats.Length >= 3)
+            {
+                int hp = pokemon.stats.Length > 0 ? pokemon.stats[0].base_stat : 50;
+                int atk = pokemon.stats.Length > 1 ? pokemon.stats[1].base_stat : 50;
+                int def = pokemon.stats.Length > 2 ? pokemon.stats[2].base_stat : 50;
+                int spd = pokemon.stats.Length > 5 ? pokemon.stats[5].base_stat : 50;
+                cardStatsText.text = $"HP: {hp}   ATK: {atk}   DEF: {def}   SPD: {spd}";
+            }
 
             if (cardImage != null)
                 StartCoroutine(DownloadSprite(pokemon.sprites.front_default));

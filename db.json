@@ -1,0 +1,18 @@
+{
+  "project": {
+    "studentName": "José Ignacio Trujillo",
+    "projectName": "REST API + UnityWebRequest - Baraja de Cartas"
+  },
+  "players": [
+    {
+      "id": 1,
+      "username": "Jugador 1 (José)",
+      "deck": [6, 9, 25, 94, 150]
+    },
+    {
+      "id": 2,
+      "username": "Jugador 2 (Rival)",
+      "deck": [3, 149, 130, 448, 384]
+    }
+  ]
+}
